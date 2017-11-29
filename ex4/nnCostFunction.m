@@ -62,16 +62,34 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-X_1 = [ones(m,1) X];
-A2 = sigmoid(X_1 * Theta1');
-A2_1 = [ones(size(A2,1),1) A2];
-A3 = sigmoid(A2_1 * Theta2');
+% forward propagate to get activation at each layer of the network
+A1 = [ones(m,1) X];
+Z2 = A1 * Theta1';
+A2 = [ones(size(Z2,1),1) sigmoid(Z2)];
+Z3 = A2 * Theta2';
+A3 = sigmoid(Z3);
 
 % convert y values from labels into vectors (1 = the category, all else are zero)
 Y = [eye(num_labels)](y,:);
+% calculate cost function
 J = sum(sum(((-Y) .* log(A3) - (1 - Y) .* log(1 - A3))/m));
 
+% compute and add regularization to the cost function
+reg_term = (lambda / (2*m)) * (sum(sum(Theta1(:,2:end).^2)) + sum(sum(Theta2(:,2:end).^2)));
+J = J + reg_term;
 
+% back propagation to determine gradients
+Delta3 = A3 - Y;
+Delta2 = (Delta3 * Theta2(:,2:end)) .* sigmoidGradient(Z2);
+
+Theta1_grad = (1/m) * Delta2' * A1;
+Theta2_grad = (1/m) * Delta3' * A2;
+
+% remove bias colum from Thetas, then calculate regularization and add to gradients
+reg_term1 = [zeros(size(Theta1, 1), 1) (lambda/m) * Theta1(:,2:end)];
+reg_term2 = [zeros(size(Theta2, 1), 1) (lambda/m) * Theta2(:,2:end)];
+Theta1_grad = Theta1_grad + reg_term1;
+Theta2_grad = Theta2_grad + reg_term2;
 
 
 
