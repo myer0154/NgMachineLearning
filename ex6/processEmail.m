@@ -97,7 +97,10 @@ while ~isempty(email_contents)
     %       str2). It will return 1 only if the two strings are equivalent.
     %
 
-
+    [inVocab, idx] = ismember(str, vocabList);
+    if (inVocab)
+      word_indices = [word_indices; idx];
+    end
 
 
 
